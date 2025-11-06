@@ -33,21 +33,21 @@ export class AuthGuard implements CanActivate {
       );
     }
 
-    const decodedToken = this.jwtService.verify(token);
+    try {
+      const decodedToken = this.jwtService.verify(token);
 
-    if (!decodedToken) {
+      const appUser = {
+        userId: decodedToken.id,
+        role: decodedToken.role,
+      };
+
+      request.user = appUser;
+
+      return true;
+    } catch (error) {
       throw new UnauthorizedException(
         'You are not Authorized to use this system',
       );
     }
-
-    const appUser = {
-      userId: decodedToken.id,
-      role: decodedToken.role,
-    };
-
-    request.user = appUser;
-
-    return true;
   }
 }
