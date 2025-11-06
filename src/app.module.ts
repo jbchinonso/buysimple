@@ -7,6 +7,7 @@ import { AppExceptionFilter } from 'errorhandler';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { LoanModule } from './loan/loan.module';
+import { AuthGuard } from './guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -23,6 +24,10 @@ import { LoanModule } from './loan/loan.module';
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
     {
       provide: APP_FILTER,
       useClass: AppExceptionFilter,
