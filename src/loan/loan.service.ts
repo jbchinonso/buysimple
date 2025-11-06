@@ -7,7 +7,10 @@ import { NotFoundException } from '@nestjs/common';
 export class LoanService {
   private loans: Loan[] = loansData as Loan[];
 
-  getAllLoans(status?: string, userRole?: string): Partial<Loan>[] {
+  getAllLoans(
+    status?: string,
+    userRole?: string,
+  ): { message: string; data: Loan[] } {
     let filteredLoans = [...this.loans];
 
     if (status) {
@@ -25,19 +28,23 @@ export class LoanService {
       });
     }
 
-    return filteredLoans;
+    return {
+      message: 'loans Retrieved Successfully',
+      data: filteredLoans,
+    };
   }
 
   getUserLoans(
     userEmail: string,
     userRole: string,
-  ): { loans: Partial<Loan>[] } {
+  ): { message: string; loans: Partial<Loan>[] } {
     const userLoans = this.loans.filter(
       (loan) => loan.applicant.email === userEmail,
     );
 
     if (userRole === 'staff') {
       return {
+        message: 'loans Retrieved Successfully',
         loans: userLoans.map((loan) => {
           const { totalLoan, ...filteredApplicant } = loan.applicant;
           return {
@@ -48,10 +55,16 @@ export class LoanService {
       };
     }
 
-    return { loans: userLoans };
+    return {
+      message: 'loans Retrieved Successfully',
+      loans: userLoans,
+    };
   }
 
-  getExpiredLoans(userRole: string): Partial<Loan>[] {
+  getExpiredLoans(userRole: string): {
+    expiredLoans: Partial<Loan>[];
+    message: string;
+  } {
     const now = new Date();
     const expiredLoans = this.loans.filter((loan) => {
       const maturityDate = new Date(loan.maturityDate);
@@ -59,16 +72,19 @@ export class LoanService {
     });
 
     if (userRole === 'staff') {
-      return expiredLoans.map((loan) => {
-        const { totalLoan, ...filteredApplicant } = loan.applicant;
-        return {
-          ...loan,
-          applicant: filteredApplicant,
-        };
-      });
+      return {
+        message: 'loans Retrieved Successfully',
+        expiredLoans: expiredLoans.map((loan) => {
+          const { totalLoan, ...filteredApplicant } = loan.applicant;
+          return {
+            ...loan,
+            applicant: filteredApplicant,
+          };
+        }),
+      };
     }
 
-    return expiredLoans;
+    return { expiredLoans, message: 'loans Retrieved Successfully' };
   }
 
   deleteLoan(loanId: string): { message: string } {
